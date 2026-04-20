@@ -75,7 +75,7 @@ The application allows mining engineers and operators to:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo-link.git
+git clone https://github.com/Brechneff-tjikuara/UNAM-13691CP-GROUP12----/tree/main
 
 # Navigate into the project
 cd UNAM-13691CP-GROUP12
