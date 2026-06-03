@@ -58,34 +58,33 @@ const HomeScreen = () => {
       {/* Hero Section */}
       <View style={styles.heroSection}>
         <Image source={logo} style={styles.logo} />
-        <Text style={styles.heroTitle}>Reach your audience with BlastX</Text>
+        <Text style={styles.heroTitle}>Precision Blast Management</Text>
         <Text style={styles.heroDescription}>
-          The most powerful automated blast scheduler for modern marketing
-          teams.
+          The most powerful automated blast scheduler and tracking tool for modern mining operations.
         </Text>
       </View>
 
       {/* Simplified Features */}
       <View style={styles.featuresContainer}>
         <View style={styles.featureRow}>
-          <Text style={styles.featureEmoji}>📅</Text>
+          <Text style={styles.featureEmoji}>💥</Text>
           <View style={styles.featureTextContainer}>
-            <Text style={styles.featureLabel}>Smart Scheduling</Text>
-            <Text style={styles.featureSub}>Plan your campaigns weeks in advance.</Text>
+            <Text style={styles.featureLabel}>Blast Scheduling</Text>
+            <Text style={styles.featureSub}>Plan and coordinate complex blast operations.</Text>
           </View>
         </View>
         <View style={styles.featureRow}>
-          <Text style={styles.featureEmoji}>📊</Text>
+          <Text style={styles.featureEmoji}>🛡️</Text>
           <View style={styles.featureTextContainer}>
-            <Text style={styles.featureLabel}>Real-time Analytics</Text>
-            <Text style={styles.featureSub}>Track open rates and engagement instantly.</Text>
+            <Text style={styles.featureLabel}>Safety Compliance</Text>
+            <Text style={styles.featureSub}>Integrated safety checklists and exclusion zones.</Text>
           </View>
         </View>
         <View style={styles.featureRow}>
-          <Text style={styles.featureEmoji}>🚀</Text>
+          <Text style={styles.featureEmoji}>📈</Text>
           <View style={styles.featureTextContainer}>
-            <Text style={styles.featureLabel}>Multi-channel Delivery</Text>
-            <Text style={styles.featureSub}>Email, SMS, and Push in one single blast.</Text>
+            <Text style={styles.featureLabel}>Fragmentation Analytics</Text>
+            <Text style={styles.featureSub}>Track blast results and productivity metrics.</Text>
           </View>
         </View>
       </View>
