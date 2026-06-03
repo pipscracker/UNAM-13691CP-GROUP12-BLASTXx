@@ -78,16 +78,24 @@ const SignupScreen = () => {
 
       // 3. Save User Profile
       console.log("Saving user profile to Firestore...");
-      await setDoc(doc(db, "users", user.uid), {
+      const userProfile = {
         uid: user.uid,
         name,
         email,
         companyCode: finalCode,
+        minePosition: "Mining Engineer", // Default role, can be updated in setup
+        canCreateBlasts: true, // Default permission
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      await setDoc(doc(db, "users", user.uid), userProfile);
       console.log("User profile saved.");
 
-      // 4. Create Company if new
+      // 4. Add to Company Team Subcollection
+      console.log("Adding to company team list...");
+      await setDoc(doc(db, "companies", finalCode, "team", user.uid), userProfile);
+
+      // 5. Create Company if new
       if (isNewCompany) {
         console.log("Creating new company record...");
         await setDoc(doc(db, "companies", finalCode), {
@@ -95,6 +103,7 @@ const SignupScreen = () => {
           name: name + "'s Company", // Default name, can be changed in setup
           createdAt: new Date().toISOString(),
           createdBy: user.uid,
+          rbacEnabled: false,
         });
         console.log("Company record created.");
       }
