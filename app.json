@@ -14,14 +14,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.blastx.app"
+      "bundleIdentifier": "com.blastx.marketing.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/utils/assets/images/icon.jpg",
         "backgroundColor": "#ffffff"
       },
-      "package": "blastx.app",
+      "package": "com.blastx.marketing.app",
+      "versionCode": 1,
+      "permissions": [
+        "NOTIFICATIONS",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
