@@ -21,22 +21,25 @@ const PlanEventScreen = () => {
     title: "",
     description: "",
     launchDate: "",
-    targetCount: "",
+    targetArea: "",
+    blastSize: "",
+    holeCount: "",
+    explosiveType: "",
   });
 
   // Safety Checklist
   const [checks, setChecks] = useState({
-    audienceVerified: false,
-    contentReviewed: false,
-    apiConnected: false,
-    budgetApproved: false,
+    exclusionZoneCleared: false,
+    sirenTested: false,
+    patternInspected: false,
+    guardsPositioned: false,
   });
 
   const isSafetyComplete = Object.values(checks).every((val) => val === true);
 
   const validateStep1 = () => {
-    if (!eventData.title.trim()) {
-      Alert.alert("Input Error", "Please provide a name for this campaign.");
+    if (!eventData.title.trim() || !eventData.targetArea.trim()) {
+      Alert.alert("Input Error", "Please provide a name and target area for this blast.");
       return false;
     }
     
@@ -49,7 +52,7 @@ const PlanEventScreen = () => {
 
     const targetDate = new Date(eventData.launchDate.replace(' ', 'T')).getTime();
     if (isNaN(targetDate) || targetDate <= Date.now()) {
-      Alert.alert("Time Error", "Launch time must be in the future.");
+      Alert.alert("Time Error", "Blast time must be in the future.");
       return false;
     }
 
@@ -58,7 +61,7 @@ const PlanEventScreen = () => {
 
   const handleSchedule = async () => {
     if (!isSafetyComplete) {
-      Alert.alert("Safety Warning", "All safety checks must be cleared before this event can be scheduled.");
+      Alert.alert("Safety Warning", "All safety checks must be cleared before this blast can be scheduled.");
       return;
     }
 
@@ -73,11 +76,11 @@ const PlanEventScreen = () => {
 
     setLoading(false);
     if (saved) {
-      Alert.alert("Success", "Event is now scheduled and the countdown has begun.", [
+      Alert.alert("Success", "Blast is now scheduled and the countdown has begun.", [
         { text: "View Dashboard", onPress: () => navigation.navigate("Dashboard") },
       ]);
     } else {
-      Alert.alert("Error", "Failed to initialize launch timer. Please try again.");
+      Alert.alert("Error", "Failed to initialize blast timer. Please try again.");
     }
   };
 
@@ -85,15 +88,44 @@ const PlanEventScreen = () => {
     if (step === 1) {
       return (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Event Details</Text>
-          <Text style={styles.label}>Campaign Name</Text>
+          <Text style={styles.sectionTitle}>Blast Details</Text>
+          <Text style={styles.label}>Operation Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Q4 Product Launch"
+            placeholder="e.g., Bench 450 North"
             value={eventData.title}
             onChangeText={(t) => setEventData({ ...eventData, title: t })}
           />
-          <Text style={styles.label}>Launch Date/Time</Text>
+          <Text style={styles.label}>Target Area/Level</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g., Level 22, West Wall"
+            value={eventData.targetArea}
+            onChangeText={(t) => setEventData({ ...eventData, targetArea: t })}
+          />
+          <View style={{ flexDirection: 'row', gap: 15 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Hole Count</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="0"
+                keyboardType="numeric"
+                value={eventData.holeCount}
+                onChangeText={(t) => setEventData({ ...eventData, holeCount: t })}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Size (m²)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="0"
+                keyboardType="numeric"
+                value={eventData.blastSize}
+                onChangeText={(t) => setEventData({ ...eventData, blastSize: t })}
+              />
+            </View>
+          </View>
+          <Text style={styles.label}>Blast Date/Time</Text>
           <TextInput
             style={styles.input}
             placeholder="YYYY-MM-DD HH:MM"
@@ -114,55 +146,55 @@ const PlanEventScreen = () => {
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>⚠️ Safety Preparation</Text>
+        <Text style={styles.sectionTitle}>⚠️ Safety Protocol</Text>
         <Text style={styles.stepDescription}>
-          Verify the following requirements to unlock the launch timer.
+          Verify the following requirements to unlock the detonation timer.
         </Text>
 
         <View style={styles.checkItem}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.checkLabel}>Audience Verified</Text>
-            <Text style={styles.checkSub}>Database has been scrubbed for errors.</Text>
+            <Text style={styles.checkLabel}>Exclusion Zone Cleared</Text>
+            <Text style={styles.checkSub}>All personnel and equipment evacuated.</Text>
           </View>
           <Switch
-            value={checks.audienceVerified}
-            onValueChange={(v) => setChecks({ ...checks, audienceVerified: v })}
+            value={checks.exclusionZoneCleared}
+            onValueChange={(v) => setChecks({ ...checks, exclusionZoneCleared: v })}
             trackColor={{ false: "#D1D1D1", true: "#2ECC71" }}
           />
         </View>
 
         <View style={styles.checkItem}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.checkLabel}>Content Reviewed</Text>
-            <Text style={styles.checkSub}>Copy and media approved by stakeholders.</Text>
+            <Text style={styles.checkLabel}>Siren & Warning Tested</Text>
+            <Text style={styles.checkSub}>Audible warning signals are functional.</Text>
           </View>
           <Switch
-            value={checks.contentReviewed}
-            onValueChange={(v) => setChecks({ ...checks, contentReviewed: v })}
+            value={checks.sirenTested}
+            onValueChange={(v) => setChecks({ ...checks, sirenTested: v })}
             trackColor={{ false: "#D1D1D1", true: "#2ECC71" }}
           />
         </View>
 
         <View style={styles.checkItem}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.checkLabel}>API Connectivity</Text>
-            <Text style={styles.checkSub}>External providers are responding.</Text>
+            <Text style={styles.checkLabel}>Pattern Inspected</Text>
+            <Text style={styles.checkSub}>Charging and tie-ins verified by supervisor.</Text>
           </View>
           <Switch
-            value={checks.apiConnected}
-            onValueChange={(v) => setChecks({ ...checks, apiConnected: v })}
+            value={checks.patternInspected}
+            onValueChange={(v) => setChecks({ ...checks, patternInspected: v })}
             trackColor={{ false: "#D1D1D1", true: "#2ECC71" }}
           />
         </View>
 
         <View style={styles.checkItem}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.checkLabel}>Budget Approved</Text>
-            <Text style={styles.checkSub}>Spend limits for this event are authorized.</Text>
+            <Text style={styles.checkLabel}>Guards Positioned</Text>
+            <Text style={styles.checkSub}>Access points secured and monitored.</Text>
           </View>
           <Switch
-            value={checks.budgetApproved}
-            onValueChange={(v) => setChecks({ ...checks, budgetApproved: v })}
+            value={checks.guardsPositioned}
+            onValueChange={(v) => setChecks({ ...checks, guardsPositioned: v })}
             trackColor={{ false: "#D1D1D1", true: "#2ECC71" }}
           />
         </View>
