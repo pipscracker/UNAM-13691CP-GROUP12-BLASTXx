@@ -31,68 +31,63 @@ const SignupScreen = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   };
 
-  const handleSignup = async () => {
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
+const handleSignup = async () => {
+  if (!email || !password || !name) {
+    Alert.alert("Error", "Please fill in all required fields");
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
+  setLoading(true);
+  try {
+    // 1. Create the user in Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-    setLoading(true);
-    try {
-      // 1. Create User
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+    // 2. Clean up company code input
+    let finalCompanyCode = companyCode.trim().toUpperCase();
 
-      // 2. Determine Company Code (Use existing or generate new)
-      let finalCode = companyCode.trim().toUpperCase();
-      let isNewCompany = false;
+    // 3. Handle Firestore safely
+    if (finalCompanyCode) {
+      const companyRef = doc(db, "companies", finalCompanyCode);
+      const companySnap = await getDoc(companyRef);
 
-      if (!finalCode) {
-        finalCode = generateCode();
-        isNewCompany = true;
-      } else {
-        // Check if company exists
-        const companySnap = await getDoc(doc(db, "companies", finalCode));
-        if (!companySnap.exists()) {
-          isNewCompany = true;
-        }
-      }
-
-      // 3. Save User Profile
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name,
-        email,
-        companyCode: finalCode,
-        createdAt: new Date().toISOString(),
-      });
-
-      // 4. Create Company if new
-      if (isNewCompany) {
-        await setDoc(doc(db, "companies", finalCode), {
-          code: finalCode,
-          name: name + "'s Company", // Default name, can be changed in setup
-          createdAt: new Date().toISOString(),
-          createdBy: user.uid,
+      if (!companySnap.exists()) {
+        // If code doesn't exist, create it on the fly instead of crashing!
+        await setDoc(companyRef, {
+          name: "My First Company",
+          createdAt: new Date().toISOString()
         });
       }
-
-      Alert.alert("Success", `Account created! Your Company Code is: ${finalCode}`, [
-        { text: "Continue", onPress: () => navigation.navigate("Setup") }
-      ]);
-
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Signup Failed", error.message);
-    } finally {
-      setLoading(false);
+    } else {
+      // If they left it blank, make a generic one
+      finalCompanyCode = "BLASTX-" + Math.floor(1000 + Math.random() * 9000);
+      const companyRef = doc(db, "companies", finalCompanyCode);
+      await setDoc(companyRef, {
+        name: "Independent Blasters",
+        createdAt: new Date().toISOString()
+      });
     }
-  };
+
+    // 4. Save the actual profile document
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      fullName: name,
+      email: email,
+      companyCode: finalCompanyCode,
+      role: "user",
+      createdAt: new Date().toISOString()
+    });
+
+    Alert.alert("Success", "Account created successfully!");
+    // navigation.navigate("Home");
+
+  } catch (error) {
+    console.error("Signup process broken here:", error);
+    Alert.alert("Registration Error", error.message);
+  } finally {
+    setLoading(false); // This stops the endless spinning!
+  }
+};
 
   return (
     <KeyboardAvoidingView
