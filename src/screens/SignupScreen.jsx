@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import logo from "../utils/assets/images/light icon (1).png";
+import logo from "../../assets/icon.png";
 import { auth, db } from "../utils/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -43,51 +43,87 @@ const handleSignup = async () => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // 2. Clean up company code input
-    let finalCompanyCode = companyCode.trim().toUpperCase();
+    setLoading(true);
+    try {
+      console.log("Starting signup for:", email);
+      // 1. Create User
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Auth user created:", user.uid);
 
     // 3. Handle Firestore safely
     if (finalCompanyCode) {
       const companyRef = doc(db, "companies", finalCompanyCode);
       const companySnap = await getDoc(companyRef);
 
-      if (!companySnap.exists()) {
-        // If code doesn't exist, create it on the fly instead of crashing!
-        await setDoc(companyRef, {
-          name: "My First Company",
-          createdAt: new Date().toISOString()
-        });
+      if (!finalCode) {
+        finalCode = generateCode();
+        isNewCompany = true;
+        console.log("Generated new company code:", finalCode);
+      } else {
+        console.log("Checking existing company code:", finalCode);
+        // Check if company exists
+        try {
+          const companySnap = await getDoc(doc(db, "companies", finalCode));
+          if (!companySnap.exists()) {
+            isNewCompany = true;
+            console.log("Company code does not exist, will create new.");
+          } else {
+            console.log("Joining existing company.");
+          }
+        } catch (docErr) {
+          console.error("Error checking company:", docErr);
+          // If we can't check, assume we need to create it (or handle as error)
+          isNewCompany = true;
+        }
       }
-    } else {
-      // If they left it blank, make a generic one
-      finalCompanyCode = "BLASTX-" + Math.floor(1000 + Math.random() * 9000);
-      const companyRef = doc(db, "companies", finalCompanyCode);
-      await setDoc(companyRef, {
-        name: "Independent Blasters",
-        createdAt: new Date().toISOString()
-      });
-    }
 
-    // 4. Save the actual profile document
-    await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      fullName: name,
-      email: email,
-      companyCode: finalCompanyCode,
-      role: "user",
-      createdAt: new Date().toISOString()
-    });
+      // 3. Save User Profile
+      console.log("Saving user profile to Firestore...");
+      const role = isNewCompany ? "admin" : "member";
+      const userProfile = {
+        uid: user.uid,
+        name,
+        email,
+        companyCode: finalCode,
+        role: role,
+        minePosition: isNewCompany ? "Admin / Site Manager" : "Mining Engineer",
+        canCreateBlasts: true, // Default permission
+        createdAt: new Date().toISOString(),
+      };
+
+      await setDoc(doc(db, "users", user.uid), userProfile);
+      console.log("User profile saved.");
+
+      // 4. Add to Company Team Subcollection
+      console.log("Adding to company team list...");
+      await setDoc(doc(db, "companies", finalCode, "team", user.uid), userProfile);
+
+      // 5. Create Company if new
+      if (isNewCompany) {
+        console.log("Creating new company record...");
+        await setDoc(doc(db, "companies", finalCode), {
+          code: finalCode,
+          name: name + "'s Company", // Default name, can be changed in setup
+          createdAt: new Date().toISOString(),
+          registeredBy: user.uid,
+          rbacEnabled: true, // Default to true as per user description
+          location: "Not Set",
+          mineType: "Not Set",
+        });
+        console.log("Company record created.");
+      }
 
     Alert.alert("Success", "Account created successfully!");
     // navigation.navigate("Home");
 
-  } catch (error) {
-    console.error("Signup process broken here:", error);
-    Alert.alert("Registration Error", error.message);
-  } finally {
-    setLoading(false); // This stops the endless spinning!
-  }
-};
+    } catch (error) {
+      console.error("SIGNUP ERROR:", error);
+      Alert.alert("Signup Failed", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView

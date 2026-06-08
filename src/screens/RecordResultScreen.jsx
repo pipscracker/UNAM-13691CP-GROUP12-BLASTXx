@@ -20,6 +20,7 @@ const RecordResultScreen = () => {
   const { blastId, blastTitle } = route.params || {};
 
   const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState(null);
   const [resultData, setResultData] = useState({
     fragmentation: "",
     productivity: "",
@@ -27,24 +28,28 @@ const RecordResultScreen = () => {
     notes: "",
   });
 
-  // Cross-platform helper to ensure web compatibility during local testing
-  const displayAlert = (title, message, actions) => {
-    if (Platform.OS === 'web') {
-      alert(`${title}\n\n${message}`);
-      if (actions && actions[0] && actions[0].onPress) {
-        actions[0].onPress();
-      }
-    } else {
-      Alert.alert(title, message, actions);
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    const data = await storage.getUserData();
+    setUserData(data);
+    
+    if (data && !storage.canManageBlasts(data)) {
+      Alert.alert("Access Denied", "You do not have permission to record blast results.");
+      navigation.goBack();
     }
   };
 
   const handleSave = async () => {
-    if (!blastId) {
-      displayAlert("Error", "Missing target identifier context.");
+    if (!blastId || !userData) return;
+
+    if (!storage.canManageBlasts(userData)) {
+      Alert.alert("Error", "Unauthorized action.");
       return;
     }
-    
+
     if (!resultData.fragmentation || !resultData.productivity) {
       displayAlert("Input Error", "Please provide fragmentation and productivity metrics.");
       return;
@@ -52,8 +57,8 @@ const RecordResultScreen = () => {
 
     setLoading(true);
     try {
-      // Update data record structure securely in the Firestore collection
-      await updateDoc(doc(db, "blasts", blastId), {
+      const blastRef = doc(db, "companies", userData.companyCode, "blasts", blastId);
+      await updateDoc(blastRef, {
         status: "Completed",
         results: {
           fragmentation: Number(resultData.fragmentation) || resultData.fragmentation,
