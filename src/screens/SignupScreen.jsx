@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,9 +11,8 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-
-// Configuration and Assets
 import logo from "../../assets/icon.png";
 import { auth, db } from "../utils/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -22,8 +20,6 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const SignupScreen = () => {
   const navigation = useNavigation();
-
-  // State Management
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,12 +27,10 @@ const SignupScreen = () => {
   const [companyCode, setCompanyCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Helper Functions
   const generateCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   };
 
-  // Event Handlers
   const handleSignup = async () => {
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields");
@@ -49,10 +43,8 @@ const SignupScreen = () => {
     }
 
     setLoading(true);
-
     try {
       console.log("Starting signup for:", email);
-
       // 1. Create User
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -138,14 +130,12 @@ const SignupScreen = () => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header Section */}
         <View style={styles.header}>
           <Image source={logo} style={styles.logo} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Start sending blasts today</Text>
         </View>
 
-        {/* Registration Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
@@ -202,7 +192,6 @@ const SignupScreen = () => {
             />
           </View>
 
-          {/* Submit Button */}
           <Pressable 
             style={[styles.signupButton, loading && { opacity: 0.7 }]} 
             onPress={handleSignup}
@@ -215,7 +204,6 @@ const SignupScreen = () => {
             )}
           </Pressable>
 
-          {/* Footer Navigation */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
             <Pressable onPress={() => navigation.navigate("Login")}>
@@ -230,7 +218,6 @@ const SignupScreen = () => {
 
 export default SignupScreen;
 
-// Stylesheets
 const styles = StyleSheet.create({
   container: {
     flex: 1,
