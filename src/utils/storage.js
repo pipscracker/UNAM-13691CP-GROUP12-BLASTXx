@@ -26,7 +26,7 @@ export const storage = {
   // ==========================================
   // USER PROFILE & CACHING
   // ==========================================
-  
+
   getUserData: async (forceRefresh = false) => {
     try {
       const user = auth.currentUser;
@@ -65,7 +65,7 @@ export const storage = {
     try {
       await setDoc(doc(db, "companies", companyCode), details, { merge: true });
       await AsyncStorage.setItem(KEYS.IS_SETUP_COMPLETE, "true");
-      
+
       // Clear cache to force refresh on next load
       await AsyncStorage.removeItem(KEYS.CACHED_USER);
     } catch (e) {
